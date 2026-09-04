@@ -25,7 +25,8 @@ shared/scenario.ts ─► server (GET /api/event, GET /api/pulse)
 
 ## Design system - "Civic Authority"
 Both faces MUST share this identity (it is the approved hi-fi design). The reference render is
-`../design/hifi-design.html` (open it - build to match it).
+`./DESIGN-REFERENCE.html` (open it in a browser - build to match it). `./WIREFRAMES-REFERENCE.html`
+shows the annotated low-fi layout.
 
 ### Color tokens (light)
 | Token | Hex | Use |
