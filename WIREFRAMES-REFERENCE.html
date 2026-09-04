@@ -1,0 +1,422 @@
+<title>Bengaluru Pulse Wireframes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --paper:#eef1f5; --surface:#ffffff; --surface-2:#f4f6f9;
+    --ink:#14181f; --ink-soft:#5a6472; --ink-faint:#8b95a3;
+    --line:#d3d9e2; --line-strong:#aab3c0; --wire:#e5eaf1; --wire-2:#dae1ea;
+    --accent:#2b5cad; --accent-soft:#e4ecf8;
+    --ok:#2e7d5b; --ok-bg:#e3f1ea; --warn:#b9760f; --warn-bg:#faf0dd; --crit:#c0392f; --crit-bg:#f9e5e2;
+    --shadow:0 1px 2px rgba(20,24,31,.06),0 8px 24px rgba(20,24,31,.06);
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --paper:#0c1016; --surface:#151b23; --surface-2:#111720;
+      --ink:#e7ebf1; --ink-soft:#9aa4b2; --ink-faint:#6b7482;
+      --line:#28303b; --line-strong:#3a4450; --wire:#1a212b; --wire-2:#212a35;
+      --accent:#6fa0ea; --accent-soft:#1b2634;
+      --ok:#4cbb8b; --ok-bg:#152a22; --warn:#e0a94b; --warn-bg:#2c2413; --crit:#e26b60; --crit-bg:#2e1a18;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 26px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#0c1016; --surface:#151b23; --surface-2:#111720;
+    --ink:#e7ebf1; --ink-soft:#9aa4b2; --ink-faint:#6b7482;
+    --line:#28303b; --line-strong:#3a4450; --wire:#1a212b; --wire-2:#212a35;
+    --accent:#6fa0ea; --accent-soft:#1b2634;
+    --ok:#4cbb8b; --ok-bg:#152a22; --warn:#e0a94b; --warn-bg:#2c2413; --crit:#e26b60; --crit-bg:#2e1a18;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 26px rgba(0,0,0,.4);
+  }
+
+  *{box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    line-height:1.5;-webkit-font-smoothing:antialiased;}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;}
+
+  .wrap{max-width:1220px;margin:0 auto;padding:32px 24px 72px;}
+
+  /* Masthead */
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--accent);font-weight:600;}
+  .masthead{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:22px;}
+  .masthead h1{font-size:clamp(26px,4vw,38px);font-weight:700;letter-spacing:-.02em;margin:.35em 0 .15em;
+    text-wrap:balance;}
+  .masthead .sub{color:var(--ink-soft);max-width:70ch;font-size:15px;}
+  .scenario{margin-top:14px;display:inline-flex;gap:10px;align-items:baseline;flex-wrap:wrap;
+    font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--ink-soft);
+    background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:8px 12px;}
+  .scenario b{color:var(--ink);font-weight:600;}
+
+  /* Decisions legend */
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 4px;}
+  .tag{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink-soft);
+    background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 10px;
+    display:inline-flex;gap:6px;align-items:center;}
+  .tag b{color:var(--accent);font-weight:600;}
+
+  /* Canvas */
+  .canvas{display:grid;grid-template-columns:minmax(300px,340px) 1fr;gap:28px;margin-top:34px;align-items:start;}
+  @media (max-width:920px){.canvas{grid-template-columns:1fr;}}
+
+  .frame-label{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;}
+  .frame-label h2{font-size:16px;font-weight:600;letter-spacing:-.01em;margin:0;}
+  .frame-label span{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-faint);
+    text-transform:uppercase;letter-spacing:.1em;}
+
+  /* Annotation badge */
+  .anno{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 4px;
+    border-radius:5px;background:var(--accent);color:#fff;font-family:"IBM Plex Mono",monospace;
+    font-size:11px;font-weight:600;vertical-align:middle;}
+  :root[data-theme="dark"] .anno,
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .anno{color:#0c1016;}}
+
+  /* ===== Device: phone ===== */
+  .phone{background:var(--surface);border:2px solid var(--line-strong);border-radius:26px;
+    padding:10px;box-shadow:var(--shadow);}
+  .phone-screen{background:var(--surface-2);border:1px solid var(--line);border-radius:18px;overflow:hidden;}
+  .p-status{display:flex;justify-content:space-between;align-items:center;padding:9px 16px;
+    border-bottom:1px solid var(--line);font-size:13px;font-weight:600;}
+  .p-status small{color:var(--ink-faint);font-weight:500;}
+  .p-body{padding:18px 16px 16px;display:flex;flex-direction:column;gap:14px;}
+
+  .chip{display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:13px;
+    padding:6px 12px;border-radius:999px;width:max-content;}
+  .chip .dot{width:8px;height:8px;border-radius:50%;background:currentColor;}
+  .chip.ok{color:var(--ok);background:var(--ok-bg);}
+  .chip.warn{color:var(--warn);background:var(--warn-bg);}
+  .chip.crit{color:var(--crit);background:var(--crit-bg);}
+  .chip.big{font-size:15px;padding:9px 16px;}
+
+  .advisory{font-size:16px;line-height:1.45;color:var(--ink);}
+  .actions{display:flex;flex-direction:column;gap:8px;}
+  .action{display:flex;gap:9px;align-items:flex-start;font-size:14.5px;color:var(--ink);}
+  .action .arw{color:var(--accent);font-weight:700;}
+  .areabox{border:1px dashed var(--line-strong);border-radius:10px;padding:10px 12px;
+    background:var(--wire);font-size:13.5px;display:flex;justify-content:space-between;align-items:center;}
+  .areabox .lab{color:var(--ink-soft);}
+  .areabox .val{font-weight:600;color:var(--crit);display:inline-flex;gap:6px;align-items:center;}
+
+  .scrub{padding-top:2px;}
+  .scrub .track{height:6px;border-radius:999px;background:var(--wire-2);position:relative;}
+  .scrub .fill{position:absolute;left:0;top:0;height:100%;width:58%;border-radius:999px;background:var(--accent);}
+  .scrub .knob{position:absolute;left:58%;top:50%;width:16px;height:16px;border-radius:50%;
+    background:var(--surface);border:2px solid var(--accent);transform:translate(-50%,-50%);}
+  .scrub .ends{display:flex;justify-content:space-between;font-family:"IBM Plex Mono",monospace;
+    font-size:10.5px;color:var(--ink-faint);margin-top:7px;}
+
+  .p-foot{border-top:1px solid var(--line);padding:9px 16px;font-size:11.5px;color:var(--ink-faint);
+    font-family:"IBM Plex Mono",monospace;}
+
+  .statebar{display:flex;gap:8px;margin-top:14px;align-items:center;}
+  .statebar .lbl{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--ink-faint);
+    text-transform:uppercase;letter-spacing:.1em;margin-right:2px;}
+
+  /* ===== Device: desktop console ===== */
+  .browser{background:var(--surface);border:1px solid var(--line-strong);border-radius:12px;
+    overflow:hidden;box-shadow:var(--shadow);}
+  .b-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);
+    background:var(--surface-2);}
+  .b-bar .dots{display:flex;gap:6px;}
+  .b-bar .dots i{width:10px;height:10px;border-radius:50%;background:var(--wire-2);display:block;}
+  .b-url{flex:1;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-faint);
+    background:var(--wire);border:1px solid var(--line);border-radius:6px;padding:4px 10px;}
+
+  .c-top{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;
+    border-bottom:1px solid var(--line);}
+  .c-top .brand{font-weight:600;font-size:15px;}
+  .c-top .org{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink-soft);
+    background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:4px 9px;}
+
+  .c-event{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+    padding:14px 18px;background:var(--surface-2);border-bottom:1px solid var(--line);}
+  .c-event .eid{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink-faint);}
+  .c-event .etitle{font-size:15px;font-weight:600;margin-top:2px;}
+
+  .c-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:0;}
+  @media (max-width:620px){.c-grid{grid-template-columns:1fr;}}
+  .cell{padding:16px 18px;border-bottom:1px solid var(--line);}
+  .cell + .cell{border-left:1px solid var(--line);}
+  @media (max-width:620px){.cell + .cell{border-left:none;}}
+  .cell h3{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--ink-soft);margin:0 0 12px;font-weight:600;display:flex;align-items:center;gap:8px;}
+
+  /* Flood-context map placeholder */
+  .map{position:relative;height:186px;border:1px dashed var(--line-strong);border-radius:10px;overflow:hidden;
+    background:
+      repeating-linear-gradient(45deg,transparent,transparent 13px,var(--wire-2) 13px,var(--wire-2) 14px),
+      var(--wire);}
+  .map .lowzone{position:absolute;left:12%;top:38%;width:52%;height:44%;border-radius:40% 60% 55% 45%;
+    background:color-mix(in srgb,var(--accent) 20%,transparent);border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);}
+  .map .corr{position:absolute;left:14%;top:30%;right:16%;height:3px;background:var(--ink-soft);border-radius:2px;
+    transform:rotate(8deg);transform-origin:left;}
+  .map .node{position:absolute;width:11px;height:11px;border-radius:50%;background:var(--surface);
+    border:2px solid var(--ink-soft);}
+  .map .pin{position:absolute;width:12px;height:12px;border-radius:50% 50% 50% 0;background:var(--crit);
+    transform:rotate(-45deg);box-shadow:0 0 0 3px var(--crit-bg);}
+  .map .cap{position:absolute;left:10px;bottom:8px;right:10px;font-family:"IBM Plex Mono",monospace;
+    font-size:10px;color:var(--ink-soft);background:color-mix(in srgb,var(--surface) 82%,transparent);
+    padding:4px 7px;border-radius:5px;line-height:1.35;}
+  .maplabels{display:flex;gap:12px;margin-top:9px;flex-wrap:wrap;font-family:"IBM Plex Mono",monospace;
+    font-size:10.5px;color:var(--ink-faint);}
+  .maplabels span{display:inline-flex;align-items:center;gap:5px;}
+  .swatch{width:10px;height:10px;border-radius:2px;display:inline-block;}
+
+  /* Impact stats */
+  .stats{display:flex;flex-direction:column;gap:0;}
+  .stat{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;
+    border-bottom:1px dotted var(--line);}
+  .stat:last-child{border-bottom:none;}
+  .stat .k{font-size:13px;color:var(--ink-soft);}
+  .stat .v{font-family:"IBM Plex Mono",monospace;font-size:14px;font-weight:600;
+    font-variant-numeric:tabular-nums;}
+  .conf{display:flex;gap:14px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);}
+  .conf .box{flex:1;}
+  .conf .lab{font-family:"IBM Plex Mono",monospace;font-size:10px;text-transform:uppercase;
+    letter-spacing:.1em;color:var(--ink-faint);}
+  .conf .num{font-size:19px;font-weight:700;font-family:"IBM Plex Mono",monospace;margin-top:2px;}
+  .bar{height:5px;border-radius:999px;background:var(--wire-2);margin-top:6px;overflow:hidden;}
+  .bar i{display:block;height:100%;background:var(--accent);width:72%;}
+
+  .factors{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:7px;}
+  .factors li{font-size:13px;color:var(--ink);display:flex;gap:8px;align-items:flex-start;}
+  .factors li::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);
+    margin-top:7px;flex:none;}
+
+  /* Recommendations */
+  .recs{padding:16px 18px;border-bottom:1px solid var(--line);}
+  .rec{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;
+    padding:11px 0;border-bottom:1px dotted var(--line);}
+  .rec:last-child{border-bottom:none;}
+  .rec .txt{font-size:14px;}
+  .rec .txt small{display:block;color:var(--ink-faint);font-family:"IBM Plex Mono",monospace;font-size:10.5px;margin-top:2px;}
+  .owner{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;padding:3px 8px;border-radius:5px;
+    background:var(--accent-soft);color:var(--accent);white-space:nowrap;}
+  .status{font-family:"IBM Plex Mono",monospace;font-size:11.5px;white-space:nowrap;}
+  .status.pending{color:var(--ink-faint);}
+  .status.ack{color:var(--warn);}
+  .status.done{color:var(--ok);}
+  .btn{font-family:"IBM Plex Sans",sans-serif;font-size:12.5px;font-weight:600;color:#fff;background:var(--accent);
+    border:none;border-radius:7px;padding:7px 12px;cursor:default;white-space:nowrap;}
+  :root[data-theme="dark"] .btn{color:#0c1016;}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn{color:#0c1016;}}
+
+  /* Outcome */
+  .outcome{padding:16px 18px;background:var(--surface-2);}
+  .outcome .row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+  .outcome .verdict{font-size:14px;}
+  .outcome .verdict b{color:var(--ok);}
+  .outcome .avoided{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--ink-soft);margin-top:6px;}
+  .outcome .avoided b{color:var(--ink);font-weight:600;}
+  .replay{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--accent);
+    border:1px solid var(--accent);border-radius:6px;padding:5px 10px;}
+
+  /* Annotations legend */
+  .notes{margin-top:40px;border-top:1px solid var(--line);padding-top:26px;}
+  .notes h2{font-size:15px;font-weight:600;margin:0 0 4px;}
+  .notes p.sub{color:var(--ink-soft);font-size:13.5px;margin:0 0 18px;}
+  .notegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+  .note{display:flex;gap:11px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);
+    border-radius:10px;padding:13px 14px;}
+  .note .body{font-size:13px;color:var(--ink-soft);}
+  .note .body b{color:var(--ink);font-weight:600;display:block;margin-bottom:2px;font-size:13.5px;}
+  .note .body .ref{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--accent);}
+
+  .foot{margin-top:34px;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-faint);
+    display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;border-top:1px solid var(--line);padding-top:14px;}
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <div class="eyebrow">Bengaluru Pulse · Wireframes v0.1 · low-fidelity</div>
+    <h1>Two faces of a cross-agency mobility decision layer</h1>
+    <p class="sub">A citizen habit-signal and an agency accountability console, both driven by one
+      rain-driven disruption event. Greyscale blocks are placeholders; color appears only where the
+      product's <em>state</em> is the information. Numbered badges tie each region to a decision locked in the brainstorm.</p>
+    <div class="scenario mono">
+      <span>ANCHOR SCENARIO —</span>
+      <b>ORR East · Silk Board → Marathahalli</b>
+      <span>·</span><b>evening rain 4–9 PM</b>
+      <span>·</span><span>monsoon pilot, 1 corridor</span>
+    </div>
+    <div class="legend">
+      <span class="tag mono"><b>Q1b</b> recommend-and-account</span>
+      <span class="tag mono"><b>Q2b</b> early-warning risk flags</span>
+      <span class="tag mono"><b>Q3b</b> ASTraM interoperable</span>
+      <span class="tag mono"><b>Q5b</b> WhatsApp opt-in</span>
+      <span class="tag mono"><b>Q6c</b> matched-baseline North Star</span>
+      <span class="tag mono"><b>Q7a·Q8a</b> Bhuvan flood-context</span>
+      <span class="tag mono"><b>Q9a</b> citizen distilled only</span>
+      <span class="tag mono"><b>Q11</b> BTP · GBA · BMTC · DULT</span>
+    </div>
+  </header>
+
+  <div class="canvas">
+    <!-- ============ CITIZEN PULSE (mobile) ============ -->
+    <section>
+      <div class="frame-label"><h2>Citizen Pulse</h2><span>Mobile · one glanceable card</span></div>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="p-status">
+            <span>Bengaluru Pulse</span>
+            <small class="mono">Wed 4 Sep · 4:15 PM</small>
+          </div>
+          <div class="p-body">
+            <span class="chip warn big"><span class="dot"></span>Delay Risk <span class="anno">4</span></span>
+            <p class="advisory">Rain plus ORR congestion may add <strong>25–40 min</strong> to east
+              Bengaluru trips between <strong>5–8 PM</strong>.</p>
+            <div class="actions">
+              <div class="action"><span class="arw">→</span><span>Leave before <strong>4:45 PM</strong></span></div>
+              <div class="action"><span class="arw">→</span><span>Or take the Metro (Purple Line)</span></div>
+            </div>
+            <div class="areabox">
+              <span class="lab">Your area · Marathahalli <span class="anno">1</span></span>
+              <span class="val"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block"></span>Flood-prone: High</span>
+            </div>
+            <div class="scrub">
+              <div class="track"><div class="fill"></div><div class="knob"></div></div>
+              <div class="ends mono"><span>2:00 PM</span><span class="anno">2</span><span>8:00 PM</span></div>
+            </div>
+          </div>
+          <div class="p-foot mono">Updated 4:15 PM · delivered via WhatsApp opt-in <span class="anno">3</span></div>
+        </div>
+      </div>
+      <div class="statebar">
+        <span class="lbl">States</span>
+        <span class="chip ok"><span class="dot"></span>Normal</span>
+        <span class="chip warn"><span class="dot"></span>Delay Risk</span>
+        <span class="chip crit"><span class="dot"></span>Disruption</span>
+      </div>
+    </section>
+
+    <!-- ============ AGENCY CONSOLE (desktop) ============ -->
+    <section>
+      <div class="frame-label"><h2>Agency Console</h2><span>Desktop · Risk → Why → Impact → Intervention → Owner → Status</span></div>
+      <div class="browser">
+        <div class="b-bar">
+          <div class="dots"><i></i><i></i><i></i></div>
+          <div class="b-url mono">pulse.dult.gov.in / console</div>
+        </div>
+        <div class="c-top">
+          <span class="brand">Bengaluru Pulse — Agency Console</span>
+          <span class="org mono">DULT · Urban Mobility Mission</span>
+        </div>
+        <div class="c-event">
+          <div>
+            <div class="eid mono">ACTIVE RISK EVENT · #2026-0904-ORR-E</div>
+            <div class="etitle">ORR East · Silk Board → Marathahalli · window 5:00–8:00 PM</div>
+          </div>
+          <span class="chip warn big"><span class="dot"></span>Delay Risk ↑</span>
+        </div>
+
+        <div class="c-grid">
+          <div class="cell">
+            <h3>Why — flood-context layer <span class="anno">5</span></h3>
+            <div class="map">
+              <div class="lowzone"></div>
+              <div class="corr"></div>
+              <div class="node" style="left:14%;top:27%;"></div>
+              <div class="node" style="right:16%;top:44%;"></div>
+              <div class="pin" style="left:40%;top:52%;"></div>
+              <div class="pin" style="left:58%;top:60%;"></div>
+              <div class="cap mono">ISRO Bhuvan satellite + terrain · low-lying zones shaded ·
+                storm-water drains · ⬤ historical-waterlog pins (Bellandur, Ecospace)</div>
+            </div>
+            <div class="maplabels mono">
+              <span><span class="swatch" style="background:color-mix(in srgb,var(--accent) 30%,transparent)"></span>Low-lying / flood-prone</span>
+              <span><span class="swatch" style="background:var(--crit)"></span>Waterlog history</span>
+              <span><span class="swatch" style="background:var(--ink-soft)"></span>Corridor</span>
+            </div>
+          </div>
+
+          <div class="cell">
+            <h3>Impact</h3>
+            <div class="stats">
+              <div class="stat"><span class="k">Added travel time</span><span class="v">+25–40 min</span></div>
+              <div class="stat"><span class="k">People affected</span><span class="v">~120,000</span></div>
+              <div class="stat"><span class="k">Bus routes exposed (BMTC)</span><span class="v">18</span></div>
+              <div class="stat"><span class="k">Junctions in spread</span><span class="v">3</span></div>
+            </div>
+            <div class="conf">
+              <div class="box">
+                <div class="lab mono">Confidence <span class="anno">6</span></div>
+                <div class="num">72%</div>
+                <div class="bar"><i></i></div>
+              </div>
+              <div class="box">
+                <div class="lab mono">Uncertainty</div>
+                <div class="num">±15 min</div>
+                <div class="bar"><i style="width:32%;background:var(--warn)"></i></div>
+              </div>
+            </div>
+            <ul class="factors">
+              <li>IMD nowcast: heavy rain 4:30–6:30 PM</li>
+              <li>Historical waterlogging: Bellandur, Ecospace jn</li>
+              <li>Live congestion index 0.6 → rising</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="recs">
+          <h3 style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 10px;font-weight:600;">
+            Recommendations → Owner → Status <span class="anno">7</span></h3>
+          <div class="rec">
+            <div class="txt">Deploy field staff at Ecospace junction<small>Divert + manage merge</small></div>
+            <span class="owner mono">BTP</span>
+            <button class="btn">Approve &amp; assign</button>
+          </div>
+          <div class="rec">
+            <div class="txt">Pre-position drainage pumps, Bellandur<small>Clear known choke drains</small></div>
+            <span class="owner mono">GBA</span>
+            <span class="status ack mono">✔ Acknowledged 4:22</span>
+          </div>
+          <div class="rec">
+            <div class="txt">Reroute 500-series buses<small>Avoid submerged underpass</small></div>
+            <span class="owner mono">BMTC</span>
+            <span class="status pending mono">⧗ Awaiting response</span>
+          </div>
+          <div class="rec">
+            <div class="txt">Push citizen advisory (WhatsApp)<small>East Bengaluru opt-in list</small></div>
+            <span class="owner mono">DULT</span>
+            <span class="status done mono">✔ Sent 4:15 · 38k reached</span>
+          </div>
+        </div>
+
+        <div class="outcome">
+          <h3 style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 10px;font-weight:600;">
+            Outcome — prediction vs reality <span class="anno">8</span></h3>
+          <div class="row">
+            <div>
+              <div class="verdict">Flagged 4:15 PM → actual peak delay <b>31 min</b> (predicted 25–40) <b>✓</b></div>
+              <div class="avoided mono">Est. delay avoided <b>~14,000 person-min</b> · matched-baseline estimate</div>
+            </div>
+            <span class="replay mono">replay ▷</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============ ANNOTATIONS ============ -->
+  <div class="notes">
+    <h2>Annotations</h2>
+    <p class="sub">Each badge above marks where a grilled decision shows up in the interface.</p>
+    <div class="notegrid">
+      <div class="note"><span class="anno">1</span><div class="body"><b>Distilled flood risk, not a map</b>Citizen sees their area's risk in plain words. No satellite browser on the citizen face. <span class="ref">Q9a</span></div></div>
+      <div class="note"><span class="anno">2</span><div class="body"><b>Timeline scrubber</b>Demo control to replay how the signal changes through the event window. <span class="ref">prototype demo</span></div></div>
+      <div class="note"><span class="anno">3</span><div class="body"><b>WhatsApp opt-in delivery</b>Pilot channel — zero install, one-tap opt-out, stores only phone + area. <span class="ref">Q5b · Q12</span></div></div>
+      <div class="note"><span class="anno">4</span><div class="body"><b>Three signal states</b>Normal / Delay Risk / Disruption — the only place color carries meaning on the citizen card. <span class="ref">core loop</span></div></div>
+      <div class="note"><span class="anno">5</span><div class="body"><b>Bhuvan flood-context = the "Why"</b>ISRO Bhuvan satellite + terrain, low-lying zones, drains, waterlog pins. Context layer, not live imagery, not a standalone guide. <span class="ref">Q7a · Q8a</span></div></div>
+      <div class="note"><span class="anno">6</span><div class="body"><b>Confidence + uncertainty</b>Honest early-warning framing on pre-mapped vulnerable segments, 30–90 min lead. No clairvoyant claims. <span class="ref">Q2b</span></div></div>
+      <div class="note"><span class="anno">7</span><div class="body"><b>Recommend-and-account</b>Each agency owns its action; status makes acted / acknowledged / no-response visible. Never a command. <span class="ref">Q1b · Q11</span></div></div>
+      <div class="note"><span class="anno">8</span><div class="body"><b>Prediction vs reality</b>Replayable outcome + estimated delay avoided (matched-baseline). The North Star, honestly labeled. <span class="ref">Q6c · Q10</span></div></div>
+    </div>
+  </div>
+
+  <div class="foot mono">
+    <span>Bengaluru Pulse · design/wireframes.html</span>
+    <span>Placeholders only · no live data · ASTraM interoperable, not a dependency (Q3b)</span>
+  </div>
+</div>
