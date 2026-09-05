@@ -1,0 +1,14 @@
+{
+  "name": "bengaluru-pulse",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Bengaluru Pulse monorepo - server API + ingestion, agency console, citizen app, shared contracts.",
+  "scripts": {
+    "build": "npm ci --prefix server && npm run build --prefix server",
+    "start": "npm run start --prefix server",
+    "build:console": "npm ci --prefix console && npm run build --prefix console"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
