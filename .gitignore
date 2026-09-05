@@ -12,3 +12,4 @@ web-build/
 coverage/
 .vite/
 .review/
+.claude/
