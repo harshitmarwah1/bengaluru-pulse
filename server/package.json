@@ -7,15 +7,19 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/server/src/index.js"
+    "start": "node dist/server/src/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "oxlint"
   },
   "dependencies": {
     "@fastify/cors": "^9.0.1",
+    "@supabase/supabase-js": "^2.45.4",
     "expo-server-sdk": "^3.10.0",
     "fastify": "^4.28.1"
   },
   "devDependencies": {
     "@types/node": "^20.14.10",
+    "oxlint": "^1.79.0",
     "tsx": "^4.16.2",
     "typescript": "^5.5.3"
   }

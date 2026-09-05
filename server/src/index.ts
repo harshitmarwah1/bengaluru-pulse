@@ -1,13 +1,18 @@
 // Bengaluru Pulse - API server.
-// Implements API_CONTRACT.md exactly. In-memory only, no database.
-// Serves the canonical shared/scenario.ts data; console + mobile are pure clients.
+// Implements API_CONTRACT.md v2. Supabase-backed (service-role key); console
+// and mobile are pure clients - they never touch the DB for writes.
 
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 
-import { event, findRecommendation, registerPushToken, tokenCount } from "./state";
-import { toCitizenPulse } from "../../shared/scenario";
-import { sendAdvisory } from "./advisory";
+import { getSupabase, supabaseConfigured, SupabaseNotConfiguredError } from "./db/client";
+import { healthRoutes } from "./routes/health";
+import { eventsRoutes } from "./routes/events";
+import { pulseRoutes } from "./routes/pulse";
+import { pushRoutes } from "./routes/push";
+import { advisoryRoutes } from "./routes/advisory";
+import { recommendationsRoutes } from "./routes/recommendations";
+import { startPipeline } from "./pipeline";
 
 const PORT = Number(process.env.PORT ?? 4000);
 
@@ -18,67 +23,33 @@ async function main() {
     origin: ["http://localhost:5173", /\.exp\.direct$/, /^exp:\/\//, "*"],
   });
 
-  // GET /api/health
-  app.get("/api/health", async () => ({ ok: true }));
-
-  // GET /api/event - full risk event for the agency console.
-  app.get("/api/event", async () => event);
-
-  // GET /api/pulse?at=<clockMinutes> - citizen subset for the mobile app.
-  app.get<{ Querystring: { at?: string } }>("/api/pulse", async (req, reply) => {
-    const { at } = req.query;
-    let atMinutes: number | undefined;
-    if (at !== undefined) {
-      const parsed = Number(at);
-      if (Number.isNaN(parsed)) {
-        return reply.status(400).send({ ok: false, error: "invalid 'at' query param" });
-      }
-      atMinutes = parsed;
+  app.setErrorHandler((err, req, reply) => {
+    if (err instanceof SupabaseNotConfiguredError) {
+      req.log.warn(err.message);
+      return reply.status(503).send({ ok: false, error: "Supabase is not configured on this server" });
     }
-    return toCitizenPulse(event, atMinutes);
+    req.log.error(err);
+    return reply.status(500).send({ ok: false, error: "internal server error" });
   });
 
-  // POST /api/push/register - mobile registers its Expo push token.
-  app.post<{ Body: { expoPushToken?: string; area?: string } }>(
-    "/api/push/register",
-    async (req, reply) => {
-      const { expoPushToken, area } = req.body ?? {};
-      if (!expoPushToken || typeof expoPushToken !== "string") {
-        return reply.status(400).send({ ok: false, error: "expoPushToken is required" });
-      }
-      registerPushToken(expoPushToken, area);
-      return { ok: true, registered: tokenCount() };
-    }
-  );
-
-  // POST /api/advisory/send - fan out the current citizen advisory via Expo push.
-  app.post<{ Body: { at?: number } }>("/api/advisory/send", async (req) => {
-    const at = req.body?.at;
-    return sendAdvisory(typeof at === "number" ? at : undefined);
-  });
-
-  // POST /api/recommendations/:id/approve - approve/assign a recommendation.
-  app.post<{ Params: { id: string } }>(
-    "/api/recommendations/:id/approve",
-    async (req, reply) => {
-      const rec = findRecommendation(req.params.id);
-      if (!rec) {
-        return reply.status(404).send({ ok: false, error: `no recommendation '${req.params.id}'` });
-      }
-
-      if (rec.triggersCitizenPush || rec.id === "rec-dult-advisory") {
-        await sendAdvisory();
-        return rec;
-      }
-
-      rec.status = "awaiting";
-      rec.statusMeta = `Assigned - awaiting ${rec.owner}`;
-      return rec;
-    }
-  );
+  await app.register(healthRoutes);
+  await app.register(eventsRoutes);
+  await app.register(pulseRoutes);
+  await app.register(pushRoutes);
+  await app.register(advisoryRoutes);
+  await app.register(recommendationsRoutes);
 
   await app.listen({ port: PORT, host: "0.0.0.0" });
   app.log.info(`Bengaluru Pulse server listening on http://localhost:${PORT}`);
+
+  // Seam: the feed/ingestion/prediction pipeline (owned by another Wave 1
+  // agent) starts here, exactly once, after the server is already accepting
+  // requests. Skipped gracefully when there is no database to write into.
+  if (supabaseConfigured) {
+    startPipeline(getSupabase());
+  } else {
+    app.log.warn("[pipeline] Supabase not configured - skipping feed/ingestion pipeline startup");
+  }
 }
 
 main().catch((err) => {
