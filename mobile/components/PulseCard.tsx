@@ -4,13 +4,13 @@
 // the timeline scrubber, and a "delivered via WhatsApp opt-in" footer.
 
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 
 import { Palette, radius, stateColors, stateLabel } from "../app/theme";
 import { formatNow } from "../app/time";
-import type { CitizenPulse } from "../app/types";
+import type { CitizenAction, CitizenPulse } from "../app/types";
 import TimelineScrubber from "./TimelineScrubber";
 
 interface Props {
@@ -18,6 +18,7 @@ interface Props {
   palette: Palette;
   scrubValue: number;
   onScrub: (clockMinutes: number) => void;
+  onActionTap?: (kind: CitizenAction["kind"]) => void;
   loading?: boolean;
   isMock?: boolean;
 }
@@ -33,7 +34,7 @@ const ACTION_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
   metro: "train-outline",
 };
 
-export default function PulseCard({ pulse, palette, scrubValue, onScrub, loading, isMock }: Props) {
+export default function PulseCard({ pulse, palette, scrubValue, onScrub, onActionTap, loading, isMock }: Props) {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 60_000);
@@ -79,15 +80,19 @@ export default function PulseCard({ pulse, palette, scrubValue, onScrub, loading
 
         <View style={styles.acts}>
           {pulse.actions.map((action, i) => (
-            <View
+            <Pressable
               key={`${action.kind}-${i}`}
-              style={[styles.act, { backgroundColor: palette.surface2, borderColor: palette.hair }]}
+              onPress={() => onActionTap?.(action.kind)}
+              style={({ pressed }) => [
+                styles.act,
+                { backgroundColor: palette.surface2, borderColor: palette.hair, opacity: pressed ? 0.7 : 1 },
+              ]}
             >
               <View style={[styles.actIcon, { backgroundColor: palette.indigoSoft }]}>
                 <Ionicons name={ACTION_ICON[action.kind] ?? "time-outline"} size={15} color={palette.indigo} />
               </View>
               <Text style={[styles.actText, { color: palette.ink }]}>{action.text}</Text>
-            </View>
+            </Pressable>
           ))}
         </View>
 

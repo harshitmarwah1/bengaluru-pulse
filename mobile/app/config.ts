@@ -30,3 +30,7 @@ export const PILOT_AREA = "Marathahalli";
 
 /** Network requests give up after this long and fall back to mock data. */
 export const FETCH_TIMEOUT_MS = 6000;
+
+/** Amplitude mobile project key (see app/analytics.ts). Unset -> analytics no-ops cleanly. */
+export const AMPLITUDE_API_KEY: string | undefined =
+  process.env.EXPO_PUBLIC_AMPLITUDE_API_KEY?.trim() || undefined;
