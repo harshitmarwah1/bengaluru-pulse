@@ -1,5 +1,0 @@
-{
-  "buildCommand": "cd console && npm run build",
-  "outputDirectory": "console/dist",
-  "installCommand": "npm ci"
-}
