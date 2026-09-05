@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@amplitude/analytics-browser": "^2.45.8",
+    "@supabase/supabase-js": "^2.115.0",
     "leaflet": "^1.9.4",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
