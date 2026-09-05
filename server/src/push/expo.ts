@@ -2,10 +2,12 @@
 // token via the Expo Push API, using expo-server-sdk for chunking + receipts.
 
 import { Expo, type ExpoPushMessage } from "expo-server-sdk";
-import type { PushMessage } from "../../shared/types";
-import { getPushTokens } from "./state";
+import type { PushMessage } from "../../../shared/types";
+import { listPushTokens } from "../db/push-tokens";
 
-const expo = new Expo();
+const expo = new Expo(
+  process.env.EXPO_ACCESS_TOKEN ? { accessToken: process.env.EXPO_ACCESS_TOKEN } : undefined
+);
 
 /**
  * Sends `message` to every registered, valid Expo push token.
@@ -13,7 +15,7 @@ const expo = new Expo();
  * Gracefully returns 0 (no error) when there are no registered tokens.
  */
 export async function sendPushToAll(message: PushMessage): Promise<number> {
-  const tokens = getPushTokens().filter((t) => Expo.isExpoPushToken(t));
+  const tokens = (await listPushTokens()).filter((t) => Expo.isExpoPushToken(t));
   if (tokens.length === 0) return 0;
 
   const messages: ExpoPushMessage[] = tokens.map((to) => ({
