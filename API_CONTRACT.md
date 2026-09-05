@@ -1,109 +1,54 @@
-# Bengaluru Pulse - API Contract (v1)
+# Bengaluru Pulse - API Contract (v2, production)
 
-This is the **binding interface** between the three packages. The `server/` implements it;
-`console/` and `mobile/` are clients. Build to this contract exactly - during parallel development,
-`mobile/` may mock these responses using the example payloads below, and Wave 2 wires it to the real
-server.
+Binding interface between packages. `server/` implements it; `console/` and `mobile/` are clients.
+v2 supersedes the in-memory v1: data is Supabase-backed, the console is authenticated, and the
+system is multi-corridor. Types live in `shared/types.ts`; feed/predictor contracts in
+`shared/feeds.ts` and `shared/predictor.ts`.
 
-- **Base URL (local dev):** `http://localhost:4000`
-- **Content-Type:** `application/json`
-- **CORS:** server must allow the console origin (`http://localhost:5173`) and Expo/dev origins (`*` is acceptable for the local MVP).
-- Types are defined in `shared/types.ts`. The canonical data is `shared/scenario.ts`.
+- **Base URL:** local `http://localhost:4000`; prod = the Railway API URL.
+- **Content-Type:** `application/json`.
+- **CORS:** allow the console origin (local `http://localhost:5173`; prod = the Vercel domain) and Expo origins.
+- **Data:** the server reads/writes Supabase via the **service-role** key (bypasses RLS). Clients never touch the DB for writes.
+
+## Authentication
+- **Console (officers):** Supabase Auth. The browser holds a Supabase session; every console API call sends `Authorization: Bearer <supabase access token>`. The server verifies the JWT and loads the `officers` row. All write endpoints require a valid officer; each write is recorded in `audit_log`.
+- **Mobile (citizens):** anonymous. No auth on `/api/pulse` and `/api/push/register`.
+
+## Realtime
+The console subscribes directly to **Supabase Realtime** (Postgres changes on `events` and `recommendations`) using the anon key, so approvals and new predictions update live without polling. Not an HTTP endpoint - documented here as part of the contract.
 
 ---
 
-## GET `/api/event`
-Full risk event for the **agency console**. Returns the `PulseEvent` object.
+## GET `/api/events?corridor=<id>`
+List current risk events (one per active corridor). `corridor` optional filters to one. Returns `PulseEvent[]`. Auth: officer.
 
-**200 response** (abridged - full object is `EVENT` from `shared/scenario.ts`):
-```json
-{
-  "id": "2026-0904-ORR-E",
-  "corridor": "ORR East - Silk Board to Marathahalli",
-  "windowLabel": "5:00-8:00 PM",
-  "leadTimeMin": 45,
-  "updatedAt": "4:15 PM",
-  "state": "delay",
-  "confidencePct": 72,
-  "uncertaintyMin": 15,
-  "impact": { "addedTravelMin": [25,40], "peopleAffected": 120000, "busRoutesExposed": 18, "junctionsInSpread": 3 },
-  "factors": [ { "kind":"rain","label":"IMD nowcast:","detail":"heavy rain 4:30-6:30 PM" } ],
-  "floodContext": { "corridorNodes":[...], "waterlogPins":[...], "source":"ISRO Bhuvan ..." },
-  "recommendations": [ { "id":"rec-btp-ecospace","owner":"BTP","title":"...","detail":"...","priority":1,"status":"pending" } ],
-  "outcome": { "flaggedAt":"4:15 PM","actualPeakDelayMin":31,"predictedRange":[25,40],"withinPrediction":true,"avoidedPersonMin":14000,"baselineNote":"..." },
-  "timeline": [ { "time":"4:15 PM","clockMinutes":975,"state":"delay","citizenHeadline":"Delay Risk","advisory":"...","confidencePct":72 } ]
-}
-```
+## GET `/api/events/:id`
+Full `PulseEvent` for one event (recommendations, timeline, outcome joined in). Auth: officer.
 
-## GET `/api/pulse?at=<clockMinutes>`
-Citizen subset for the **mobile app**. Returns a `CitizenPulse`. Optional `at` query (minutes since
-midnight) selects the timeline snapshot for the scrubber; omitted = current (`updatedAt`) snapshot.
-
-**200 response:**
-```json
-{
-  "eventId": "2026-0904-ORR-E",
-  "state": "delay",
-  "headline": "Delay Risk",
-  "advisory": "Rain plus ORR congestion may add 25-40 min ... Leave before 4:45 PM or take the Metro.",
-  "actions": [ { "kind":"time","text":"Leave before 4:45 PM" }, { "kind":"metro","text":"Or take the Metro (Purple Line)" } ],
-  "area": { "name":"Marathahalli","floodProne":"High" },
-  "updatedAt": "4:15 PM",
-  "channel": "WhatsApp",
-  "timeline": [ ... ]
-}
-```
+## GET `/api/pulse?corridor=<id>&at=<clockMinutes>`
+Citizen subset for the mobile app. Returns `CitizenPulse` for the corridor's current event. `at` selects a timeline snapshot for the scrubber; omitted = current. Defaults to the pilot corridor (`orr-east`) if `corridor` omitted. Auth: none.
 
 ## POST `/api/push/register`
-Mobile app registers its Expo push token so the server can push to it.
-
-**Request:**
-```json
-{ "expoPushToken": "ExponentPushToken[xxxxxxxx]", "area": "Marathahalli" }
-```
-**200 response:** `{ "ok": true, "registered": 1 }`
-
-The server stores tokens **in memory** (an array is fine for the MVP - no database). Deduplicate by
-token.
+Body `{ "expoPushToken": "...", "area": "Marathahalli" }`. Upserts into `push_tokens` (dedupe by token). Returns `{ "ok": true, "registered": <n> }`. Auth: none.
 
 ## POST `/api/advisory/send`
-Triggered by the console's DULT "Push citizen advisory" recommendation. The server:
-1. builds a `PushMessage` from the current `CitizenPulse`,
-2. sends it to every registered Expo push token via the **Expo Push API**
-   (`https://exp.host/--/api/v2/push/send`),
-3. marks the `rec-dult-advisory` recommendation `sent` with meta `"Sent <time> - <n> reached"`.
-
-**Request (optional override):**
-```json
-{ "at": 975 }
-```
-**200 response:**
-```json
-{ "ok": true, "sent": 1, "message": { "title":"Bengaluru Pulse: Delay Risk", "body":"Rain plus ORR congestion ...", "data": { "eventId":"2026-0904-ORR-E","state":"delay" } } }
-```
-
-If there are **no registered tokens** (e.g. demoing without a phone), still return `200` with
-`"sent": 0` so the console can show a graceful "simulated - no device registered" state.
+Auth: officer. Builds a `PushMessage` from the current `CitizenPulse`, fans out via Expo Push to all `push_tokens`, writes an `advisories` row, marks the DULT advisory recommendation `sent` with `"Sent <time> - <n> reached"`, logs to `audit_log`. Body optional `{ "at": <clockMinutes>, "corridor": "<id>" }`. Returns `{ "ok": true, "sent": <n>, "message": PushMessage }`. With zero tokens, returns `200 { "sent": 0 }`.
 
 ## POST `/api/recommendations/:id/approve`
-Console approves/assigns a recommendation (recommend-and-account). Advances status:
-`pending -> awaiting` (and for `rec-dult-advisory`, calls the advisory-send path). Returns the
-updated `Recommendation`.
-
-**200 response:**
-```json
-{ "id":"rec-btp-ecospace","owner":"BTP","title":"...","detail":"...","priority":1,"status":"awaiting","statusMeta":"Assigned - awaiting BTP" }
-```
+Auth: officer. Advances `pending -> awaiting` (`"Assigned - awaiting <owner>"`); for a `triggers_citizen_push` rec, also runs the advisory-send path. Writes `audit_log`. Returns the updated `Recommendation`.
 
 ## GET `/api/health`
-`{ "ok": true }` - used by Wave 2 integration checks.
+`{ "ok": true }`. Used by deploy/integration checks. Auth: none.
+
+## Internal
+Ingestion runs as a scheduled worker (not a public route). An optional `POST /internal/ingest` guarded by the service-role key may trigger a manual pull for ops/testing.
 
 ---
 
-## Expo Push - server implementation note
-Sending a real push is a single POST per token to `https://exp.host/--/api/v2/push/send`:
-```json
-{ "to": "ExponentPushToken[...]", "title": "Bengaluru Pulse: Delay Risk", "body": "Rain plus ORR congestion ...", "data": { "eventId":"2026-0904-ORR-E", "state":"delay" } }
-```
-Use the `expo-server-sdk` npm package (handles chunking + receipts) or a plain `fetch`. No API key is
-required for basic Expo push. Tokens come from `/api/push/register`.
+## Feed + prediction pipeline (server-side, see `shared/feeds.ts`, `shared/predictor.ts`)
+1. Ingestion worker runs every `INGEST_INTERVAL_SECONDS`: each `FeedAdapter.fetch(corridor)` -> normalized `FeedReading` -> insert `feed_snapshots`.
+2. The `Predictor` reads the latest snapshot per source (`LatestReadings`) -> `PredictedEvent` -> upsert `events` (+ recommendations, timeline). `predictor_version` is stamped.
+3. Console reads via API + Realtime; mobile reads `/api/pulse`; advisory push closes the citizen loop; outcomes are measured post-window from the traffic feed.
+
+## Expo Push
+One POST per token to `https://exp.host/--/api/v2/push/send` (use `expo-server-sdk` for chunking/receipts). `EXPO_ACCESS_TOKEN` optional.

@@ -87,6 +87,14 @@ indigo `#6f8fe0`, ok `#4cc08d`, warn `#e0ab54`, crit `#e5726a`.
 - Bottom line: "delivered via WhatsApp opt-in" framing + updated time.
 - Must run in **Expo Go** on a physical phone and in an emulator.
 
-## Non-goals (do not build)
-Auth, database, real ML, multiple scenarios/corridors, turn-by-turn, a standalone satellite browser.
-All data is the single illustrative ORR scenario.
+## Prototype non-goals -> now in production scope
+The v1 prototype deliberately skipped: auth, database, real feeds, real ML, multiple corridors.
+**For the market-ready build these are in scope** - see the production plan
+`Obsidian/.../Production Readiness and Architecture.md`, the v2 `API_CONTRACT.md`, the Wave 0
+foundation (`supabase/`, `shared/feeds.ts`, `shared/predictor.ts`), and `docs/WAVE-1-BUILD-BRIEF.md`.
+
+Production topology: Supabase (Postgres + PostGIS, Auth, Realtime) as the data layer; the Fastify API
++ feed-ingestion workers on Railway; the console on Vercel; the mobile app via EAS; Amplitude for
+behavioral analytics. Feed adapters are live where a key exists and stubbed otherwise. Prediction is a
+pluggable stub now (`shared/predictor.ts`), upgradeable to heuristic/ML without touching the rest.
+Still deferred: turn-by-turn, a standalone satellite browser, govt SSO (later), WhatsApp at scale.
