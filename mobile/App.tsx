@@ -41,6 +41,16 @@ import {
 } from "./app/notifications";
 import { usePalette } from "./app/theme";
 import type { CitizenPulse } from "./app/types";
+import {
+  initAnalytics,
+  trackActionTapped,
+  trackAdvisoryViewed,
+  trackAppOpened,
+  trackPulseViewed,
+  trackPushOpened,
+  trackPushReceived,
+  trackTimelineScrubbed,
+} from "./app/analytics";
 import PulseCard from "./components/PulseCard";
 import NotificationCard from "./components/NotificationCard";
 
@@ -79,9 +89,11 @@ export default function App() {
     const result = await fetchPulse(atClockMinutes);
     setPulse(result.data);
     setIsMock(result.source === "mock");
+    trackPulseViewed(result.data.state);
     if (atClockMinutes == null) {
       const matched = result.data.timeline.find((s) => s.time === result.data.updatedAt);
       setScrubValue(matched?.clockMinutes ?? result.data.timeline[result.data.timeline.length - 1]?.clockMinutes ?? 975);
+      trackAdvisoryViewed();
     }
     return result.data;
   }, []);
@@ -103,6 +115,9 @@ export default function App() {
     if (loadedOnce.current) return;
     loadedOnce.current = true;
 
+    initAnalytics();
+    trackAppOpened();
+
     (async () => {
       try {
         await loadPulse();
@@ -121,9 +136,11 @@ export default function App() {
   // pushed state - i.e. re-fetches the current (non-scrubbed) pulse.
   useEffect(() => {
     const removeTap = addNotificationTapListener(() => {
+      trackPushOpened();
       loadPulse();
     });
     const removeReceived = addNotificationReceivedListener(() => {
+      trackPushReceived();
       loadPulse();
     });
     return () => {
@@ -141,10 +158,15 @@ export default function App() {
   const handleScrub = useCallback(
     (clockMinutes: number) => {
       setScrubValue(clockMinutes);
+      trackTimelineScrubbed();
       loadPulse(clockMinutes);
     },
     [loadPulse]
   );
+
+  const handleActionTap = useCallback((kind: "time" | "metro") => {
+    trackActionTapped(kind);
+  }, []);
 
   const handleToggleOptIn = useCallback(
     async (next: boolean) => {
@@ -199,6 +221,7 @@ export default function App() {
                 palette={palette}
                 scrubValue={scrubValue}
                 onScrub={handleScrub}
+                onActionTap={handleActionTap}
                 isMock={isMock}
               />
               <NotificationCard
