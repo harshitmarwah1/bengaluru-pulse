@@ -2,7 +2,7 @@
 // token via the Expo Push API, using expo-server-sdk for chunking + receipts.
 
 import { Expo, type ExpoPushMessage } from "expo-server-sdk";
-import type { PushMessage } from "../../../shared/types";
+import type { PushMessage } from "../shared/types";
 import { listPushTokens } from "../db/push-tokens";
 
 const expo = new Expo(

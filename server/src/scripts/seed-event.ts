@@ -10,7 +10,7 @@
 // or: npm run seed:event   (reads server/.env if you load it into the shell first)
 
 import { createClient } from "@supabase/supabase-js";
-import { EVENT } from "../../../shared/scenario";
+import { EVENT } from "../shared/scenario";
 import { deriveEventId, deriveRecommendationId } from "../predict/ids";
 
 const CORRIDOR_ID = "orr-east";

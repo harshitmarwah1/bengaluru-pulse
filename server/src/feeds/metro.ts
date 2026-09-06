@@ -4,7 +4,7 @@
 // the pipeline works with zero keys; same FeedAdapter interface a live BMRCL
 // adapter will implement later - a drop-in swap via createMetroAdapter().
 
-import type { FeedAdapter, FeedReading, MetroReading } from "../../../shared/feeds";
+import type { FeedAdapter, FeedReading, MetroReading } from "../shared/feeds";
 
 const METRO_STUB_BY_CORRIDOR: Record<string, MetroReading> = {
   "orr-east": { line: "Purple Line", status: "normal", alternativeViable: true },

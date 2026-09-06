@@ -2,7 +2,7 @@
 // corridor, shaped as the LatestReadings the Predictor contract expects.
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { FeedReading, FeedSource, LatestReadings, ReadingPayload } from "../../../shared/feeds";
+import type { FeedReading, FeedSource, LatestReadings, ReadingPayload } from "../shared/feeds";
 
 // Recent-enough window to find the latest row per source without six separate
 // queries - feed_snapshots is written by up to 6 sources per corridor per

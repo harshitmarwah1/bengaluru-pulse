@@ -6,7 +6,7 @@
 // FeedAdapter contract in shared/feeds.ts).
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { FeedReading, FeedSource, ReadingPayload } from "../../../shared/feeds";
+import type { FeedReading, FeedSource, ReadingPayload } from "../shared/feeds";
 import type { FeedAdapterBundle } from "../feeds";
 import type { CorridorRef } from "../predict/cycle";
 

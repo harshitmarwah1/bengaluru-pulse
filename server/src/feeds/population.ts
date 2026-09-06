@@ -5,7 +5,7 @@
 // FeedAdapter interface a live dataset adapter will implement later - a
 // drop-in swap via createPopulationAdapter().
 
-import type { FeedAdapter, FeedReading, PopulationReading } from "../../../shared/feeds";
+import type { FeedAdapter, FeedReading, PopulationReading } from "../shared/feeds";
 
 const POPULATION_STUB_BY_CORRIDOR: Record<string, PopulationReading> = {
   "orr-east": { peopleAffected: 120000 },

@@ -2,7 +2,7 @@
 
 import type { FastifyInstance } from "fastify";
 import { getLatestEventForCorridor } from "../db/events";
-import { toCitizenPulse } from "../../../shared/scenario";
+import { toCitizenPulse } from "../shared/scenario";
 
 // API_CONTRACT.md: "Defaults to the pilot corridor (orr-east) if corridor
 // omitted." Reused by routes/advisory.ts for the same default.

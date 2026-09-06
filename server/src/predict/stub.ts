@@ -7,9 +7,9 @@
 // built from whatever readings are available - this is the seam a heuristic
 // or ML Predictor implementation replaces later with zero API/DB changes.
 
-import type { Predictor, PredictorInput, PredictedEvent } from "../../../shared/predictor";
-import type { Recommendation } from "../../../shared/types";
-import { EVENT } from "../../../shared/scenario";
+import type { Predictor, PredictorInput, PredictedEvent } from "../shared/predictor";
+import type { Recommendation } from "../shared/types";
+import { EVENT } from "../shared/scenario";
 
 const PILOT_CORRIDOR_ID = "orr-east";
 

@@ -3,8 +3,8 @@
 // when approving the DULT advisory recommendation (API_CONTRACT.md).
 
 import type { FastifyInstance } from "fastify";
-import type { PushMessage, RiskState } from "../../../shared/types";
-import { toCitizenPulse } from "../../../shared/scenario";
+import type { PushMessage, RiskState } from "../shared/types";
+import { toCitizenPulse } from "../shared/scenario";
 import { requireOfficer } from "../auth/officer";
 import { getLatestEventForCorridor, updateRecommendationStatus } from "../db/events";
 import { insertAdvisory } from "../db/advisories";

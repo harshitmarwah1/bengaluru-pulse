@@ -6,7 +6,7 @@
 // mapping to update once real API docs/access are available.
 // Stub: deterministic ORR-shaped reading so the pipeline works with zero keys.
 
-import type { FeedAdapter, FeedReading, RainReading } from "../../../shared/feeds";
+import type { FeedAdapter, FeedReading, RainReading } from "../shared/feeds";
 
 const RAIN_STUB_BY_CORRIDOR: Record<string, RainReading> = {
   "orr-east": { intensityMmHr: 18, nowcastWindow: "4:30-6:30 PM", provider: "IMD" },

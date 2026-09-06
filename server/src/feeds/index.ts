@@ -2,7 +2,7 @@
 // One adapter per FeedSource, each picked live-vs-stub by its own factory.
 // This is the single place the ingestion worker (and tests) get adapters from.
 
-import type { FeedAdapter, FeedSource, ReadingPayload } from "../../../shared/feeds";
+import type { FeedAdapter, FeedSource, ReadingPayload } from "../shared/feeds";
 import { createTrafficAdapter } from "./traffic";
 import { createRainAdapter } from "./rain";
 import { createBusAdapter } from "./bus";

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { StubPredictor } from "../stub";
-import { EVENT } from "../../../../shared/scenario";
+import { EVENT } from "../../shared/scenario";
 
 describe("StubPredictor", () => {
   it("is stamped with version stub-0", () => {

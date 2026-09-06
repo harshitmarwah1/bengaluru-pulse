@@ -5,7 +5,7 @@
 // with zero keys; same FeedAdapter interface a live sensor adapter will
 // implement later - a drop-in swap via createFloodAdapter().
 
-import type { FeedAdapter, FeedReading, FloodReading } from "../../../shared/feeds";
+import type { FeedAdapter, FeedReading, FloodReading } from "../shared/feeds";
 
 const FLOOD_STUB_BY_CORRIDOR: Record<string, FloodReading> = {
   "orr-east": {

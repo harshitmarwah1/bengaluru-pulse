@@ -17,7 +17,7 @@ import type {
   RecommendationStatus,
   RiskState,
   TimelineSnapshot,
-} from "../../../shared/types";
+} from "../shared/types";
 
 // --- Row shapes as returned by PostgREST (snake_case) -----------------------
 

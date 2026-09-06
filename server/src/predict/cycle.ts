@@ -2,7 +2,7 @@
 // Called periodically by the pipeline for each active corridor.
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Predictor } from "../../../shared/predictor";
+import type { Predictor } from "../shared/predictor";
 import { getLatestReadings } from "./readings";
 import { upsertPredictedEvent } from "./persist";
 

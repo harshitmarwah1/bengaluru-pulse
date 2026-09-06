@@ -7,7 +7,7 @@
 // Stub: deterministic ORR-shaped reading so the pipeline works with zero keys.
 
 import GtfsRealtimeBindings from "gtfs-realtime-bindings";
-import type { FeedAdapter, FeedReading, BusReading } from "../../../shared/feeds";
+import type { FeedAdapter, FeedReading, BusReading } from "../shared/feeds";
 
 const BUS_STUB_BY_CORRIDOR: Record<string, BusReading> = {
   "orr-east": {

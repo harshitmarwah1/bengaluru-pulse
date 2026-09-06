@@ -2,7 +2,7 @@
 // Live: Google Maps Distance Matrix API (departure_time=now gives live-traffic duration).
 // Stub: deterministic ORR-shaped reading so the pipeline works with zero keys.
 
-import type { FeedAdapter, FeedReading, TrafficReading } from "../../../shared/feeds";
+import type { FeedAdapter, FeedReading, TrafficReading } from "../shared/feeds";
 
 // Corridor endpoints for the Distance Matrix query. Only corridors we know the
 // live adapter's origin/destination for can go "live" - anything else falls

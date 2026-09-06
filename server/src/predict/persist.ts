@@ -10,7 +10,7 @@
 // new recommendation id still gets the table's default ('pending').
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { PredictedEvent } from "../../../shared/predictor";
+import type { PredictedEvent } from "../shared/predictor";
 import { deriveEventId, deriveRecommendationId } from "./ids";
 
 export interface UpsertPredictedEventParams {
