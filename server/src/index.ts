@@ -29,17 +29,7 @@ async function main() {
       return reply.status(503).send({ ok: false, error: "Supabase is not configured on this server" });
     }
     req.log.error(err);
-    // TEMP DIAGNOSTIC: surface the underlying error so it can be read from the
-    // response during deploy bring-up (revert once the 500 is diagnosed).
-    const e = err as { message?: string; code?: string; hint?: string; details?: string };
-    return reply.status(500).send({
-      ok: false,
-      error: "internal server error",
-      detail: e?.message,
-      code: e?.code,
-      hint: e?.hint,
-      details: e?.details,
-    });
+    return reply.status(500).send({ ok: false, error: "internal server error" });
   });
 
   await app.register(healthRoutes);
