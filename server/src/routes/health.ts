@@ -12,6 +12,7 @@ export async function healthRoutes(app: FastifyInstance): Promise<void> {
   // URL/project-ref is not a secret; the service-role key is never exposed.
   app.get("/api/_diag", async () => {
     const out: Record<string, unknown> = {
+      build: "no-embed-hydrate",
       supabaseUrl: process.env.SUPABASE_URL ?? null,
       serviceKeySet: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY),
       serviceKeyLen: (process.env.SUPABASE_SERVICE_ROLE_KEY ?? "").length,
