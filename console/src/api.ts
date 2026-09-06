@@ -19,9 +19,15 @@ async function authHeaders(): Promise<Record<string, string>> {
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const auth = await authHeaders();
+  // Only declare a JSON content-type when we actually send a body. A bodyless
+  // POST (e.g. approve) with `Content-Type: application/json` makes Fastify's
+  // JSON parser reject the empty body (FST_ERR_CTP_EMPTY_JSON_BODY) before the
+  // route runs.
+  const headers: Record<string, string> = { ...auth, ...(init?.headers as Record<string, string>) };
+  if (init?.body != null) headers["Content-Type"] = "application/json";
   const res = await fetch(`${API_BASE}${path}`, {
     ...init,
-    headers: { "Content-Type": "application/json", ...auth, ...init?.headers },
+    headers,
   });
   if (!res.ok) {
     let detail = res.statusText;

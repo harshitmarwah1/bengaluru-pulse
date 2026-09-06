@@ -106,7 +106,10 @@
 html,
 body,
 #root {
-  height: 100%;
+  /* min-height (not height) so the page grows with content and scrolls
+     natively - a fixed height:100% caps these at the viewport and taller
+     content (the console) overflows into an unreachable, unscrollable area. */
+  min-height: 100%;
 }
 
 body {
@@ -473,7 +476,7 @@ body {
 }
 .map-frame .legend-in {
   position: absolute;
-  left: 10px;
+  right: 10px;
   bottom: 10px;
   z-index: 500;
   display: inline-flex;

@@ -28,18 +28,32 @@ export function FloodMap({ floodContext }: { floodContext: FloodContext }) {
     [floodContext.waterlogPins]
   );
 
+  const all = useMemo<[number, number][]>(
+    () => [...nodePositions.map((n) => n.pos), ...pinPositions.map((p) => p.pos)],
+    [nodePositions, pinPositions]
+  );
+
+  // Default to central Bengaluru if there are no layers to place (empty event).
   const center = useMemo<[number, number]>(() => {
-    const all = [...nodePositions.map((n) => n.pos), ...pinPositions.map((p) => p.pos)];
+    if (all.length === 0) return [12.95, 77.65];
     const lat = all.reduce((s, [la]) => s + la, 0) / all.length;
     const lng = all.reduce((s, [, ln]) => s + ln, 0) / all.length;
     return [lat, lng];
-  }, [nodePositions, pinPositions]);
+  }, [all]);
+
+  // Fit all markers with generous padding so permanent node labels never clip
+  // at the map edge or hide behind the legend. react-leaflet ignores `bounds`
+  // when `center`/`zoom` are also passed, so choose one exclusively - fall back
+  // to center+zoom only when there are too few points to form bounds.
+  const viewProps =
+    all.length >= 2
+      ? { bounds: all as [number, number][], boundsOptions: { padding: [40, 34] as [number, number] } }
+      : { center, zoom: 13 };
 
   return (
     <div className="map-frame">
       <MapContainer
-        center={center}
-        zoom={13}
+        {...viewProps}
         scrollWheelZoom={false}
         attributionControl={false}
         zoomControl={true}
