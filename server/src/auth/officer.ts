@@ -5,6 +5,7 @@
 
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { getSupabase } from "../db/client";
+import { DEV_UNAUTHED, DEV_OFFICER } from "../dev/mode";
 
 export interface Officer {
   id: string;
@@ -33,6 +34,12 @@ function extractBearerToken(header: string | undefined): string | undefined {
  * (caught by index.ts's error handler -> 503) when Supabase isn't set up.
  */
 export async function requireOfficer(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  // DEV-ONLY: skip Supabase token verification and act as a stub officer.
+  if (DEV_UNAUTHED) {
+    req.officer = DEV_OFFICER;
+    return;
+  }
+
   const token = extractBearerToken(req.headers.authorization);
   if (!token) {
     await reply.status(401).send({ ok: false, error: "missing Authorization: Bearer <token>" });

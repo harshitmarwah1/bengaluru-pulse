@@ -3,6 +3,7 @@
 // write (approve, advisory send) is recorded here.
 
 import { getSupabase } from "./client";
+import { DEV_UNAUTHED } from "../dev/mode";
 
 export interface AuditEntry {
   actorId: string;
@@ -20,6 +21,7 @@ export interface AuditEntry {
  * so a transient audit-log outage never blocks an officer from acting.
  */
 export async function writeAuditLog(entry: AuditEntry): Promise<void> {
+  if (DEV_UNAUTHED) return; // no audit table in dev-unauthed mode
   const supabase = getSupabase();
   const { error } = await supabase.from("audit_log").insert({
     actor_id: entry.actorId,

@@ -1,6 +1,7 @@
 // Bengaluru Pulse - advisories data access (the citizen-push dispatch log).
 
 import { getSupabase } from "./client";
+import { DEV_UNAUTHED } from "../dev/mode";
 
 export interface InsertAdvisoryParams {
   eventId: string;
@@ -10,6 +11,7 @@ export interface InsertAdvisoryParams {
 }
 
 export async function insertAdvisory(params: InsertAdvisoryParams): Promise<void> {
+  if (DEV_UNAUTHED) return; // no advisories table in dev-unauthed mode
   const supabase = getSupabase();
   const { error } = await supabase.from("advisories").insert({
     event_id: params.eventId,

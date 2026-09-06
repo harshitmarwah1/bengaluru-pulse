@@ -6,6 +6,14 @@
 
 import { getSupabase } from "./client";
 import { formatClockIso } from "./format";
+import { DEV_UNAUTHED } from "../dev/mode";
+import {
+  devListEvents,
+  devGetEventById,
+  devGetLatestForCorridor,
+  devFindRecommendation,
+  devUpdateRecommendation,
+} from "../dev/store";
 import type {
   Agency,
   ContributingFactor,
@@ -185,6 +193,7 @@ async function hydrateEvent(supabase: SupabaseClient, row: EventRow): Promise<Pu
 }
 
 export async function getEventById(id: string): Promise<PulseEvent | null> {
+  if (DEV_UNAUTHED) return devGetEventById(id);
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("events")
@@ -197,6 +206,7 @@ export async function getEventById(id: string): Promise<PulseEvent | null> {
 }
 
 export async function getLatestEventForCorridor(corridorId: string): Promise<PulseEvent | null> {
+  if (DEV_UNAUTHED) return devGetLatestForCorridor(corridorId);
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("events")
@@ -219,6 +229,7 @@ export async function getLatestEventForCorridor(corridorId: string): Promise<Pul
  * events table grows large enough for this to matter.
  */
 export async function listLatestEvents(corridorId?: string): Promise<PulseEvent[]> {
+  if (DEV_UNAUTHED) return devListEvents(corridorId);
   if (corridorId) {
     const event = await getLatestEventForCorridor(corridorId);
     return event ? [event] : [];
@@ -250,6 +261,7 @@ export interface RecommendationLookup {
 }
 
 export async function getRecommendationById(id: string): Promise<RecommendationLookup | null> {
+  if (DEV_UNAUTHED) return devFindRecommendation(id);
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("recommendations")
@@ -281,6 +293,7 @@ export async function updateRecommendationStatus(
   status: RecommendationStatus,
   statusMeta?: string
 ): Promise<Recommendation> {
+  if (DEV_UNAUTHED) return devUpdateRecommendation(id, status, statusMeta);
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("recommendations")

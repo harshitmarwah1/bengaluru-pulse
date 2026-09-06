@@ -2,8 +2,10 @@
 // Registration is anonymous (mobile, no auth) and deduped by token.
 
 import { getSupabase } from "./client";
+import { DEV_UNAUTHED } from "../dev/mode";
 
 export async function upsertPushToken(expoPushToken: string, area?: string): Promise<number> {
+  if (DEV_UNAUTHED) return 0; // no push_tokens table in dev-unauthed mode
   const supabase = getSupabase();
 
   // Only include `area` in the payload when provided, so a re-registration
@@ -26,6 +28,7 @@ export async function upsertPushToken(expoPushToken: string, area?: string): Pro
 }
 
 export async function listPushTokens(): Promise<string[]> {
+  if (DEV_UNAUTHED) return []; // no push_tokens table in dev-unauthed mode
   const supabase = getSupabase();
   const { data, error } = await supabase.from("push_tokens").select("expo_push_token");
   if (error) throw error;
