@@ -20,9 +20,14 @@ export async function healthRoutes(app: FastifyInstance): Promise<void> {
     if (supabaseConfigured) {
       const supabase = getSupabase();
       for (const table of ["agencies", "corridors", "events"]) {
-        const { data, error } = await supabase.from(table).select("*", { count: "exact", head: true });
-        out[table] = error ? { error: error.message, code: error.code } : { ok: true, rows: (data as unknown) ?? "head" };
+        const { error, count } = await supabase.from(table).select("*", { count: "exact", head: true });
+        out[table] = error ? { error: error.message, code: error.code } : { ok: true, count };
       }
+      // Real data SELECT on events (the path /api/pulse uses), not a HEAD probe.
+      const ev = await supabase.from("events").select("id, corridor_id, state").limit(3);
+      out.eventsSelect = ev.error
+        ? { error: ev.error.message, code: ev.error.code }
+        : { ok: true, rows: ev.data };
     }
     return out;
   });
