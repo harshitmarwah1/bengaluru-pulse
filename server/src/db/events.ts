@@ -67,34 +67,21 @@ interface EventRow {
   flood_context: FloodContext;
   updated_at: string;
   created_at: string;
-  corridors: CorridorRow | CorridorRow[] | null;
-  recommendations: RecommendationRow[] | null;
-  timeline_snapshots: TimelineRow[] | null;
-  outcomes: OutcomeRow | OutcomeRow[] | null;
 }
 
-interface RecommendationWithEventRow extends RecommendationRow {
-  event_id: string;
-  events: { corridor_id: string } | { corridor_id: string }[] | null;
-}
-
-// PostgREST embeds a to-one relation as a single object and a to-many relation
-// as an array, but which one you get for a given FK direction is easy to get
-// subtly wrong - this helper accepts either so a schema-driver quirk can't
-// silently turn into an empty event.
-function firstOrSelf<T>(v: T | T[] | null | undefined): T | undefined {
-  if (v == null) return undefined;
-  return Array.isArray(v) ? v[0] : v;
-}
-
-const EVENT_SELECT = `
-  id, corridor_id, window_label, lead_time_min, state, confidence_pct, uncertainty_min,
-  impact, factors, flood_context, updated_at, created_at,
-  corridors ( name ),
-  recommendations ( id, owner_agency, title, detail, priority, status, status_meta, triggers_citizen_push ),
-  timeline_snapshots ( time_label, clock_minutes, state, advisory, citizen_headline, confidence_pct ),
-  outcomes ( flagged_at, actual_peak_delay_min, predicted_range, within_prediction, avoided_person_min, baseline_note )
-`;
+// Base event columns only. We deliberately AVOID PostgREST resource embedding
+// (e.g. `recommendations(...)`) and hydrate related rows with separate queries
+// instead - embedding depends on the FK relationships being present in
+// PostgREST's schema cache, which proved unreliable on first bring-up. Separate
+// queries only need the tables themselves, and are fine at pilot scale.
+const EVENT_COLS =
+  "id, corridor_id, window_label, lead_time_min, state, confidence_pct, uncertainty_min, impact, factors, flood_context, updated_at, created_at";
+const REC_COLS =
+  "id, owner_agency, title, detail, priority, status, status_meta, triggers_citizen_push";
+const TIMELINE_COLS =
+  "time_label, clock_minutes, state, advisory, citizen_headline, confidence_pct";
+const OUTCOME_COLS =
+  "flagged_at, actual_peak_delay_min, predicted_range, within_prediction, avoided_person_min, baseline_note";
 
 const RECOMMENDATION_SELECT =
   "id, owner_agency, title, detail, priority, status, status_meta, triggers_citizen_push";
@@ -151,16 +138,30 @@ function mapOutcome(o: OutcomeRow | undefined, impact: Impact, updatedAt: string
   };
 }
 
-function mapEventRow(row: EventRow): PulseEvent {
-  const corridor = firstOrSelf(row.corridors);
+type SupabaseClient = ReturnType<typeof getSupabase>;
+
+// Hydrate a base event row into a full PulseEvent via separate queries (no
+// PostgREST embedding - see EVENT_COLS note).
+async function hydrateEvent(supabase: SupabaseClient, row: EventRow): Promise<PulseEvent> {
   const updatedAt = formatClockIso(row.updated_at);
 
-  const recommendations = (row.recommendations ?? [])
+  const [corridorRes, recsRes, timelineRes, outcomeRes] = await Promise.all([
+    supabase.from("corridors").select("name").eq("id", row.corridor_id).maybeSingle(),
+    supabase.from("recommendations").select(REC_COLS).eq("event_id", row.id),
+    supabase.from("timeline_snapshots").select(TIMELINE_COLS).eq("event_id", row.id),
+    supabase.from("outcomes").select(OUTCOME_COLS).eq("event_id", row.id).maybeSingle(),
+  ]);
+  if (corridorRes.error) throw corridorRes.error;
+  if (recsRes.error) throw recsRes.error;
+  if (timelineRes.error) throw timelineRes.error;
+  if (outcomeRes.error) throw outcomeRes.error;
+
+  const corridor = corridorRes.data as CorridorRow | null;
+  const recommendations = ((recsRes.data ?? []) as unknown as RecommendationRow[])
     .slice()
     .sort((a, b) => a.priority - b.priority)
     .map(mapRecommendation);
-
-  const timeline = (row.timeline_snapshots ?? [])
+  const timeline = ((timelineRes.data ?? []) as unknown as TimelineRow[])
     .slice()
     .sort((a, b) => a.clock_minutes - b.clock_minutes)
     .map(mapTimeline);
@@ -178,7 +179,7 @@ function mapEventRow(row: EventRow): PulseEvent {
     factors: row.factors,
     floodContext: row.flood_context,
     recommendations,
-    outcome: mapOutcome(firstOrSelf(row.outcomes), row.impact, updatedAt),
+    outcome: mapOutcome((outcomeRes.data as OutcomeRow | null) ?? undefined, row.impact, updatedAt),
     timeline,
   };
 }
@@ -187,26 +188,26 @@ export async function getEventById(id: string): Promise<PulseEvent | null> {
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("events")
-    .select(EVENT_SELECT)
+    .select(EVENT_COLS)
     .eq("id", id)
     .maybeSingle();
   if (error) throw error;
   if (!data) return null;
-  return mapEventRow(data as unknown as EventRow);
+  return hydrateEvent(supabase, data as unknown as EventRow);
 }
 
 export async function getLatestEventForCorridor(corridorId: string): Promise<PulseEvent | null> {
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("events")
-    .select(EVENT_SELECT)
+    .select(EVENT_COLS)
     .eq("corridor_id", corridorId)
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
   if (error) throw error;
   if (!data) return null;
-  return mapEventRow(data as unknown as EventRow);
+  return hydrateEvent(supabase, data as unknown as EventRow);
 }
 
 /**
@@ -226,20 +227,20 @@ export async function listLatestEvents(corridorId?: string): Promise<PulseEvent[
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("events")
-    .select(EVENT_SELECT)
+    .select(EVENT_COLS)
     .order("corridor_id", { ascending: true })
     .order("created_at", { ascending: false })
     .limit(500);
   if (error) throw error;
 
   const seen = new Set<string>();
-  const latest: PulseEvent[] = [];
+  const rows: EventRow[] = [];
   for (const row of (data ?? []) as unknown as EventRow[]) {
     if (seen.has(row.corridor_id)) continue;
     seen.add(row.corridor_id);
-    latest.push(mapEventRow(row));
+    rows.push(row);
   }
-  return latest;
+  return Promise.all(rows.map((row) => hydrateEvent(supabase, row)));
 }
 
 export interface RecommendationLookup {
@@ -252,18 +253,26 @@ export async function getRecommendationById(id: string): Promise<RecommendationL
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("recommendations")
-    .select(`${RECOMMENDATION_SELECT}, event_id, events ( corridor_id )`)
+    .select(`${RECOMMENDATION_SELECT}, event_id`)
     .eq("id", id)
     .maybeSingle();
   if (error) throw error;
   if (!data) return null;
 
-  const row = data as unknown as RecommendationWithEventRow;
-  const eventRel = firstOrSelf(row.events);
+  const row = data as unknown as RecommendationRow & { event_id: string };
+
+  // Fetch the parent event's corridor separately (no embed).
+  const { data: ev, error: evErr } = await supabase
+    .from("events")
+    .select("corridor_id")
+    .eq("id", row.event_id)
+    .maybeSingle();
+  if (evErr) throw evErr;
+
   return {
     recommendation: mapRecommendation(row),
     eventId: row.event_id,
-    corridorId: eventRel?.corridor_id ?? "",
+    corridorId: (ev as { corridor_id: string } | null)?.corridor_id ?? "",
   };
 }
 
