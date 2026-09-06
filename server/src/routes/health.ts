@@ -28,6 +28,21 @@ export async function healthRoutes(app: FastifyInstance): Promise<void> {
       out.eventsSelect = ev.error
         ? { error: ev.error.message, code: ev.error.code }
         : { ok: true, rows: ev.data };
+
+      // Ask PostgREST directly what tables it exposes (raw OpenAPI root).
+      try {
+        const key = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
+        const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/`, {
+          headers: { apikey: key, Authorization: `Bearer ${key}` },
+        });
+        const spec = (await res.json()) as { definitions?: Record<string, unknown>; paths?: Record<string, unknown> };
+        out.postgrestRoot = {
+          status: res.status,
+          tables: spec.definitions ? Object.keys(spec.definitions) : Object.keys(spec.paths ?? {}).slice(0, 40),
+        };
+      } catch (e) {
+        out.postgrestRoot = { error: (e as Error).message };
+      }
     }
     return out;
   });
