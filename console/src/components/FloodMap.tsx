@@ -20,11 +20,11 @@ const waterlogPinIcon = L.divIcon({
 
 export function FloodMap({ floodContext }: { floodContext: FloodContext }) {
   const nodePositions = useMemo(
-    () => floodContext.corridorNodes.map((n) => ({ ...n, pos: coordsFor(n.name, n.x, n.y) })),
+    () => (floodContext.corridorNodes ?? []).map((n) => ({ ...n, pos: coordsFor(n.name, n.x, n.y) })),
     [floodContext.corridorNodes]
   );
   const pinPositions = useMemo(
-    () => floodContext.waterlogPins.map((p) => ({ ...p, pos: coordsFor(p.name, p.x, p.y) })),
+    () => (floodContext.waterlogPins ?? []).map((p) => ({ ...p, pos: coordsFor(p.name, p.x, p.y) })),
     [floodContext.waterlogPins]
   );
 

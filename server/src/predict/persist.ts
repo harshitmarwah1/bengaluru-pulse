@@ -38,6 +38,7 @@ export async function upsertPredictedEvent(
       uncertainty_min: predicted.uncertaintyMin,
       impact: predicted.impact,
       factors: predicted.factors,
+      flood_context: predicted.floodContext,
       predictor_version: predictorVersion,
       updated_at: now,
     },

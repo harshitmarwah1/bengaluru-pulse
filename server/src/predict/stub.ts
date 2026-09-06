@@ -29,6 +29,7 @@ function pilotPredictedEvent(): PredictedEvent {
     windowLabel: EVENT.windowLabel,
     impact: EVENT.impact,
     factors: EVENT.factors,
+    floodContext: EVENT.floodContext,
     recommendations: EVENT.recommendations.map(stripRecommendationMeta),
     timeline: EVENT.timeline,
   };
@@ -58,6 +59,7 @@ function fallbackPredictedEvent(input: PredictorInput): PredictedEvent {
     factors: rain
       ? [{ kind: "rain", label: "Rain gauge:", detail: `${rain.intensityMmHr} mm/hr` }]
       : [],
+    floodContext: { corridorNodes: [], waterlogPins: [], source: "No flood-context layer for this corridor yet." },
     recommendations: [],
     timeline: [
       {

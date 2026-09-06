@@ -13,6 +13,7 @@ import type {
   PulseEvent,
   Recommendation,
   ContributingFactor,
+  FloodContext,
   Impact,
   TimelineSnapshot,
 } from "./types";
@@ -38,6 +39,7 @@ export interface PredictedEvent {
   windowLabel: string;
   impact: Impact;
   factors: ContributingFactor[];
+  floodContext: FloodContext;
   recommendations: Omit<Recommendation, "id" | "status" | "statusMeta">[];
   timeline: TimelineSnapshot[];
 }
