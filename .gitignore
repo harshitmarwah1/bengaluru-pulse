@@ -13,3 +13,4 @@ coverage/
 .vite/
 .review/
 .claude/
+supabase/.temp/
