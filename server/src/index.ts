@@ -39,33 +39,6 @@ async function main() {
   await app.register(advisoryRoutes);
   await app.register(recommendationsRoutes);
 
-  // TEMP BOOTSTRAP (guarded; remove after first officer is linked): links an
-  // existing Supabase Auth user to an officers row using the service-role key
-  // the server already holds. Only touches one specific test officer.
-  app.post<{ Querystring: { token?: string; email?: string; agency?: string } }>(
-    "/api/_seed_officer",
-    async (req, reply) => {
-      if (req.query.token !== "bootstrap-7Kq2xP") {
-        return reply.status(403).send({ ok: false, error: "forbidden" });
-      }
-      if (!supabaseConfigured) {
-        return reply.status(503).send({ ok: false, error: "supabase not configured" });
-      }
-      const email = req.query.email ?? "officer@dult.gov.in";
-      const agency = req.query.agency ?? "DULT";
-      const supabase = getSupabase();
-      const { data: list, error: le } = await supabase.auth.admin.listUsers({ perPage: 200 });
-      if (le) return reply.status(500).send({ ok: false, error: le.message });
-      const user = list.users.find((u) => u.email === email);
-      if (!user) return reply.status(404).send({ ok: false, error: "auth user not found", email });
-      const { error: ie } = await supabase
-        .from("officers")
-        .upsert({ id: user.id, name: "Test Officer", agency, role: "admin" });
-      if (ie) return reply.status(500).send({ ok: false, error: ie.message });
-      return { ok: true, linked: user.id, email, agency };
-    }
-  );
-
   await app.listen({ port: PORT, host: "0.0.0.0" });
   app.log.info(`Bengaluru Pulse server listening on http://localhost:${PORT}`);
 
